@@ -1,35 +1,38 @@
 from lxml import etree
 import re
 
-redirectPattern = re.compile("#"+"#REDIRECT"+"\\s*\\[\\[(.*?)\\]\\]")
-stubPattern = re.compile("\\-"+"stub"+"\\}\\}")
-disambiguationPattern = re.compile("\\{\\{"+"disambig"+"\\}\\}")
+redirectPattern = re.compile("#"+"#REDIRECT"+"\s*\[\[(.*?)\]\]")
+stubPattern = re.compile("\-"+"stub"+"\}\}")
+disambiguationPattern = re.compile("\{\{"+"disambig"+"\}\}")
 
-stylesPattern = re.compile("\\{\\|.*?\\|\\}$")
-infoboxCleanUpPattern = re.compile("\\{\\{infobox.*?\\}\\}")
-curlyCleanUpPattern0 = re.compile("^\\{\\{.*?\\}\\}$")
-curlyCleanUpPattern1 = re.compile("\\{\\{.*?\\}\\}")
+stylesPattern = re.compile("\{\|.*?\|\}$")
+infoboxCleanUpPattern = re.compile("\{\{infobox.*?\}\}")
+curlyCleanUpPattern0 = re.compile("^\{\{.*?\}\}$")
+curlyCleanUpPattern1 = re.compile("\{\{.*?\}\}")
 tagsPattern = re.compile("<.*>")
 commentsCleanUpPattern = re.compile("<!--.*?-->")
-linkPattern = re.compile("\[http.*]")
-numberPattern = re.compile("[ ]+[0-9]+[ ]+")
+linkPattern0 = re.compile("http.*[ ]")
+linkPattern1 = re.compile("http.*[\n]")
+numberPattern = re.compile("\d*[0-9][a-zA-Z\d]*")
 quotePattern = re.compile("[']")
-specCharsPattern = re.compile("[^A-Za-z0-9 ]")
+specCharsPattern = re.compile("[^A-Za-z0-9' ]")
 
 class Parser():
 	def __init__(self):
 		pass
 
 	def clean(self, text):
+		text = re.sub(linkPattern0, "", text)
+		text = re.sub(linkPattern1, "", text)
+		text = re.sub(quotePattern, "", text)
 		text = re.sub(stylesPattern, "", text)
 		text = re.sub(infoboxCleanUpPattern, "", text)
 		text = re.sub(curlyCleanUpPattern0, "", text)
 		text = re.sub(curlyCleanUpPattern1, "", text)
 		text = re.sub(tagsPattern, "", text)
 		text = re.sub(commentsCleanUpPattern, "", text)
-		text = re.sub(linkPattern, "", text)
-		text = re.sub(quotePattern, "", text)
 		text = re.sub(specCharsPattern, " ", text)
+		text = re.sub(quotePattern, "", text)
 		text = re.sub(numberPattern, "", text)
 		return text
 
