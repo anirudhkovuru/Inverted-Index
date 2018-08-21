@@ -62,7 +62,11 @@ class WikiIndexCreator():
 			while elem.getprevious() is not None:
 				del elem.getparent()[0]
 
-		merge_sort_parallel(arr)
+		index = merge_sort_parallel(arr)
+		out = open("index.txt", "w+")
+		for line in index:
+			out.write(line)
+		out.close()
 
 indexer = WikiIndexCreator()
 indexer.create('wiki-search-small.xml')
