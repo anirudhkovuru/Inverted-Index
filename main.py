@@ -39,30 +39,28 @@ class WikiIndexCreator():
 				line += "c" + str(index[word]["c"])
 			if "i" in index[word]:
 				line += "i" + str(index[word]["i"])
+			if "l" in index[word]:
+				line += "l" + str(index[word]["l"])
 			arr.append(line + "\n")
 
 		return arr
 
+	def process(self, text):
+		text = self.tokenizer.tokenize(text)
+		text = self.sws.remove_and_stem(text)
+		text = self.indexer.create_map(text)
+		return text
+
 	def build_params(self, element):
-		id, title, body, cat, info = self.parser.parse_page(element)
+		id, title, body, cat, info, links = self.parser.parse_page(element)
 
-		title = self.tokenizer.tokenize(title)
-		title = self.sws.remove_and_stem(title)
-		title = self.indexer.create_map(title)
+		title = self.process(title)
+		body = self.process(body)
+		cat = self.process(cat)
+		info = self.process(info)
+		links = self.process(links)
 
-		body = self.tokenizer.tokenize(body)
-		body = self.sws.remove_and_stem(body)
-		body = self.indexer.create_map(body)
-
-		cat = self.tokenizer.tokenize(cat)
-		cat = self.sws.remove_and_stem(cat)
-		cat = self.indexer.create_map(cat)
-
-		info = self.tokenizer.tokenize(info)
-		info = self.sws.remove_and_stem(info)
-		info = self.indexer.create_map(info)
-
-		index = self.indexer.combine_maps(title, body, cat, info)
+		index = self.indexer.combine_maps(title, body, cat, info, links)
 		return index, id
 
 	def create(self, infilename, outfilename):

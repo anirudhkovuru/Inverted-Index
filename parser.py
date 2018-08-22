@@ -16,6 +16,7 @@ linkPattern = re.compile("\[\[(.*?)\]\]", re.M)
 cleanupPattern0 = re.compile("^\[\[.*?:.*?\]\]$", re.M|re.S)
 cleanupPattern1 = re.compile("\[\[(.*?)\]\]", re.M|re.S)
 numberPattern = re.compile("\d*[0-9][a-zA-Z\d]*")
+#singlePattern = re.compile("\\b[a-zA-Z]\\b")
 quotePattern = re.compile("[']")
 specCharsPattern = re.compile("[^A-Za-z0-9' ]")
 
@@ -35,7 +36,8 @@ class Parser():
 		text = re.sub(tagsPattern, " ", text)
 		text = re.sub(commentsCleanUpPattern, " ", text)
 		text = re.sub(specCharsPattern, " ", text)
-		text = re.sub(numberPattern, "", text)
+		text = re.sub(numberPattern, " ", text)
+		#text = re.sub(singlePattern, " ", text)
 		return text
 
 	def parse_id(self, element):
@@ -81,7 +83,7 @@ class Parser():
 			link = temp[0]
 			if ":" not in link:
 				valLinks.append(link)
-		links = self.clean(" ".join(valLinks)) 
+		links = self.clean(" ".join(valLinks))
 		return links
 
 	def parse_text(self, element):
@@ -93,11 +95,10 @@ class Parser():
 		links = self.parse_link(textElem[0].text)
 		text = self.clean(textElem[0].text)
 
-		print(links)
-		return text, categories, infobox
+		return text, categories, infobox, links
 
 	def parse_page(self, element):
 		id = self.parse_id(element)
 		title = self.parse_title(element)
-		body, cat, info = self.parse_text(element)
-		return id, title, body, cat, info
+		body, cat, info, links = self.parse_text(element)
+		return id, title, body, cat, info, links
