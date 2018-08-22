@@ -132,8 +132,6 @@ def parse_memory(string):
     else:
         return int(string)
 
-def sort_file(filename):
-    sorter = ExternalSort(parse_memory("5M"))
+def sort_file(filename, memory):
+    sorter = ExternalSort(parse_memory(memory))
     sorter.sort(filename)
-
-sort_file("index")
