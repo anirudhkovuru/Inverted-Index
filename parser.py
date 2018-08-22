@@ -12,11 +12,10 @@ curlyCleanUpPattern0 = re.compile("^\{\{.*?\}\}$", re.S|re.M)
 curlyCleanUpPattern1 = re.compile("\{\{.*?\}\}", re.S|re.M)
 tagsPattern = re.compile("<.*>")
 commentsCleanUpPattern = re.compile("<!--.*?-->", re.S|re.M)
-linkPattern = re.compile("\[\[(.*?)\]\]", re.M)
-cleanupPattern0 = re.compile("^\[\[.*?:.*?\]\]$", re.M|re.S)
+linkPattern0 = re.compile("http.*[ ]")
+linkPattern1 = re.compile("http.*[\n]")
 cleanupPattern1 = re.compile("\[\[(.*?)\]\]", re.M|re.S)
 numberPattern = re.compile("\d*[0-9][a-zA-Z\d]*")
-#singlePattern = re.compile("\\b[a-zA-Z]\\b")
 quotePattern = re.compile("[']")
 specCharsPattern = re.compile("[^A-Za-z0-9' ]")
 
@@ -25,8 +24,8 @@ class Parser():
 		pass
 
 	def clean(self, text):
-		text = re.sub(cleanupPattern0, " ", text)
-		text = re.sub(cleanupPattern1, " ", text)
+		text = re.sub(linkPattern0, " ", text)
+		text = re.sub(linkPattern1, " ", text)
 		text = re.sub(quotePattern, "", text)
 		text = re.sub(stylesPattern, " ", text)
 		text = re.sub(infoboxCleanUpPattern, " ", text)
@@ -37,7 +36,6 @@ class Parser():
 		text = re.sub(commentsCleanUpPattern, " ", text)
 		text = re.sub(specCharsPattern, " ", text)
 		text = re.sub(numberPattern, " ", text)
-		#text = re.sub(singlePattern, " ", text)
 		return text
 
 	def parse_id(self, element):

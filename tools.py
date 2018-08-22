@@ -56,9 +56,9 @@ class Indexer():
         index = Counter(text)
         return index
 
-    def combine_maps(self, title, text, cat, info):
+    def combine_maps(self, title, text, cat, info, links):
         index = defaultdict(lambda: defaultdict(int))
-        for k, v in chain(title.items(), text.items(), cat.items(), info.items()):
+        for k, v in chain(title.items(), text.items(), cat.items(), info.items(), links.items()):
             if k in title:
                 if title[k] == v:
                     index[k]['t'] = v
@@ -71,6 +71,9 @@ class Indexer():
             if k in info:
                 if info[k] == v:
                     index[k]['i'] = v
+            if k in links:
+                if links[k] == v:
+                    index[k]['l'] = v
 
         #return OrderedDict(sorted(index.items())
         return index

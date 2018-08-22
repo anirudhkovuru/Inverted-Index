@@ -1,8 +1,6 @@
 import math
 import multiprocessing
-import random
 import sys
-import time
 
 
 def merge(*args):
