@@ -37,7 +37,8 @@ class StopWordStem():
 
     def remove_and_stem(self, tokens):
         filtered_text = [stem(w) for w in tokens if not w in stop_words]
-        return filtered_text
+        more_filtered_text = [w for w in filtered_text if not w in stop_words]
+        return more_filtered_text
 
 class Tokenizer():
     def __init__(self):
