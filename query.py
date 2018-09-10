@@ -109,7 +109,7 @@ def search(query):
                             else:
                                 posting_list[i] = [int(temp.split("-")[0]), temp.split("-")[1]]
 
-                        # [DOC_ID, FIELD_PARTS]
+                        # [[DOC_ID, FIELD_PARTS], ......]
 
                         for i in range(len(posting_list)):
                             freq = re.split(r"[a-z]", posting_list[i][1])
@@ -119,16 +119,17 @@ def search(query):
                                 tf += int(j)
                             posting_list[i][1] = m.log10(1 + tf) * idf[t]
 
-                        champions_list = dict(sorted(top_docs.items(), key=operator.itemgetter(1), reverse=True)[:10])
-
-                        # [DOC_ID, FREQ]
+                        # [[DOC_ID, FREQ], ....]
 
                         for i in range(1, len(posting_list)):
                             posting_list[i][0] = posting_list[i][0] + posting_list[i-1][0]
 
-                            if posting_list[i][0] not in doc_list:
-                                doc_list[posting_list[i][0]] = {}
-                            doc_list[posting_list[i][0]][t] = posting_list[i][1]
+                        champions_list = sorted(posting_list, key=lambda x: x[1], reverse=True)[:20]
+
+                        for i in range(len(champions_list)):
+                            if champions_list[i][0] not in doc_list:
+                                doc_list[champions_list[i][0]] = {}
+                            doc_list[champions_list[i][0]][t] = champions_list[i][1]
                         break
             f.close()
 
