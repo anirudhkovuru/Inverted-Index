@@ -2,6 +2,7 @@ from porter_stem import stem
 from collections import Counter, defaultdict, OrderedDict
 from itertools import chain
 
+# Stop word dictionary
 stop_words = {'he': 0, 'at': 0, "wont": 0, 'below': 0, "its": 0, 'under': 0,
 'who': 0, 'her': 0, "wasnt": 0, 'have': 0, 'while': 0, 'how': 0, 'both': 0,
 "arent": 0, 'and': 0, 'yours': 0, 'i': 0, 'in': 0, 'own': 0, "shes": 0,
@@ -31,35 +32,44 @@ stop_words = {'he': 0, 'at': 0, "wont": 0, 'below': 0, "its": 0, 'under': 0,
 'his': 0, 'when': 0, 'of': 0, 'whom': 0, 'from': 0, 'myself': 0}
 
 
-class StopWordStem():
+# Stopword and stemming class
+class StopWordStem:
     def __init__(self):
         pass
 
+    # Method to remove stopwords and stemming
     def remove_and_stem(self, tokens):
-        filtered_text = [stem(w) for w in tokens if not w in stop_words]
-        more_filtered_text = [w for w in filtered_text if not w in stop_words]
+        filtered_text = [stem(w) for w in tokens if w not in stop_words]
+        more_filtered_text = [w for w in filtered_text if w not in stop_words]
         return more_filtered_text
 
-class Tokenizer():
+
+# Tokenizer class
+class Tokenizer:
     def __init__(self):
         pass
 
+    # Method to tokenize
     def tokenize(self, text):
         text = text.lower()
         tokens = text.split()
         return tokens
 
-class Indexer():
+
+# Index dictionary class
+class Indexer:
     def __init__(self):
         pass
 
+    # Method to create a counter dictionary
     def create_map(self, text):
         index = Counter(text)
         return index
 
-    def combine_maps(self, title, text, cat, info, links):
+    # Method to combine all the dictionaries by key values (words)
+    def combine_maps(self, title, text, cat, info, links, refs):
         index = defaultdict(lambda: defaultdict(int))
-        for k, v in chain(title.items(), text.items(), cat.items(), info.items(), links.items()):
+        for k, v in chain(title.items(), text.items(), cat.items(), info.items(), links.items(), refs.items()):
             if k in title:
                 if title[k] == v:
                     index[k]['t'] = v
@@ -75,6 +85,9 @@ class Indexer():
             if k in links:
                 if links[k] == v:
                     index[k]['l'] = v
+            if k in refs:
+                if refs[k] == v:
+                    index[k]['r'] = v
 
-        #return OrderedDict(sorted(index.items())
+        # return OrderedDict(sorted(index.items())
         return index

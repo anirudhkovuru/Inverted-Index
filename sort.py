@@ -1,7 +1,6 @@
 import os
-import sys
-import argparse
 from merge_sort import merge_sort_parallel
+
 
 class FileSplitter(object):
     BLOCK_FILENAME_FORMAT = 'block_{0}.dat'
@@ -45,8 +44,14 @@ class NWayMerge(object):
         min_str = None
 
         for i in range(len(choices)):
-            if min_str is None or choices[i] < min_str:
+            if min_str is None or choices[i].split(":")[0] < min_str.split(":")[0]:
                 min_index = i
+                min_str = choices[i]
+
+        with open("test.txt", 'a+') as f:
+            for key, value in choices.items():
+                f.write('%s:%s' % (key, value))
+            f.write("min_index = " + str(min_index) + "\n")
 
         return min_index
 
@@ -62,15 +67,44 @@ class FilesArray(object):
         return {i: self.buffers[i] for i in range(self.num_buffers) if i not in self.empty}
 
     def refresh(self):
-        for i in range(self.num_buffers):
-            if self.buffers[i] is None and i not in self.empty:
-                self.buffers[i] = self.files[i].readline()
+        i = 0
+        #print(self.buffers)
+        while i < self.num_buffers:
+            if i not in self.empty:
+                combined = False
+                line = self.files[i].readline()
+                word = line.split(":")
+                for k in self.buffers:
+                    if self.buffers[k] is None or self.buffers[k] == "":
+                        continue
+                    temp = self.buffers[k].split(":")
+                    if temp[0] == word[0]:
+                        new_k = word[0] + ":" + temp[1].rstrip() + "|" + word[1].rstrip() + "\n"
+                        self.buffers[k] = new_k
+                        combined = True
+                        break
+                if combined:
+                    continue
+                elif self.buffers[i] is None:
+                    self.buffers[i] = line
 
                 if self.buffers[i] == '':
                     self.empty.add(i)
 
+            i += 1
+
         if len(self.empty) == self.num_buffers:
             return False
+
+        # for i in range(self.num_buffers):
+        #     if self.buffers[i] is None and i not in self.empty:
+        #         self.buffers[i] = self.files[i].readline()
+        #
+        #         if self.buffers[i] == '':
+        #             self.empty.add(i)
+        #
+        # if len(self.empty) == self.num_buffers:
+        #     return False
 
         return True
 
@@ -102,7 +136,6 @@ class FileMerger(object):
         return files
 
 
-
 class ExternalSort(object):
     def __init__(self, block_size):
         self.block_size = block_size
@@ -131,6 +164,7 @@ def parse_memory(string):
         return int(string[:-1]) * 1024 * 1024 * 1024
     else:
         return int(string)
+
 
 def sort_file(filename, memory):
     sorter = ExternalSort(parse_memory(memory))
