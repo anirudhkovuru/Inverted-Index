@@ -48,11 +48,6 @@ class NWayMerge(object):
                 min_index = i
                 min_str = choices[i]
 
-        with open("test.txt", 'a+') as f:
-            for key, value in choices.items():
-                f.write('%s:%s' % (key, value))
-            f.write("min_index = " + str(min_index) + "\n")
-
         return min_index
 
 
@@ -67,44 +62,15 @@ class FilesArray(object):
         return {i: self.buffers[i] for i in range(self.num_buffers) if i not in self.empty}
 
     def refresh(self):
-        i = 0
-        #print(self.buffers)
-        while i < self.num_buffers:
-            if i not in self.empty:
-                combined = False
-                line = self.files[i].readline()
-                word = line.split(":")
-                for k in self.buffers:
-                    if self.buffers[k] is None or self.buffers[k] == "":
-                        continue
-                    temp = self.buffers[k].split(":")
-                    if temp[0] == word[0]:
-                        new_k = word[0] + ":" + temp[1].rstrip() + "|" + word[1].rstrip() + "\n"
-                        self.buffers[k] = new_k
-                        combined = True
-                        break
-                if combined:
-                    continue
-                elif self.buffers[i] is None:
-                    self.buffers[i] = line
+        for i in range(self.num_buffers):
+            if self.buffers[i] is None and i not in self.empty:
+                self.buffers[i] = self.files[i].readline()
 
                 if self.buffers[i] == '':
                     self.empty.add(i)
 
-            i += 1
-
         if len(self.empty) == self.num_buffers:
             return False
-
-        # for i in range(self.num_buffers):
-        #     if self.buffers[i] is None and i not in self.empty:
-        #         self.buffers[i] = self.files[i].readline()
-        #
-        #         if self.buffers[i] == '':
-        #             self.empty.add(i)
-        #
-        # if len(self.empty) == self.num_buffers:
-        #     return False
 
         return True
 

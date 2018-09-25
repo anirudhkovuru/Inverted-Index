@@ -2,7 +2,7 @@ from query import search
 from time import time as t
 
 title_map = {}
-with open("mapping.txt", encoding="utf8") as f:
+with open("100mapping.txt", encoding="utf8") as f:
     for line in f:
         doc_id = line.split()[0]
         try:
@@ -22,5 +22,6 @@ if __name__ == "__main__":
         if not doc_list:
             print("No results found")
         for k in doc_list:
-            print(title_map[k])
+            if k in title_map:
+                print(title_map[k])
         print("Time taken:", t() - start)

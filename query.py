@@ -93,7 +93,7 @@ def search(query):
         doc_list = {}
         idf = {}
         for t in terms.q:
-            with open("./46gb/levels/" + t[0] + ".txt", "r") as f:
+            with open("./index/" + t[0] + ".txt", "r") as f:
                 for line in f:
                     temp = line.rstrip().split(":")
                     word = temp[0].split("-")[0]

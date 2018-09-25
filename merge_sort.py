@@ -31,6 +31,7 @@ def merge(*args):
         merged.extend(left[left_index:])
     return merged
 
+
 def merge_sort(data):
     length = len(data)
     if length <= 1:
@@ -39,6 +40,7 @@ def merge_sort(data):
     left = merge_sort(data[:middle])
     right = merge_sort(data[middle:])
     return merge(left, right)
+
 
 def merge_sort_parallel(data):
     # Creates a pool of worker processes, one per CPU core.
