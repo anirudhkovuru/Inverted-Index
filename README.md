@@ -21,6 +21,7 @@ This section involves searching through the index to obtain relevant documents a
 The **cosine similarity** for each document with the query is then calculated and the top 10 results and their document IDs are chosen.\
 To further reduce the number of computations, **champions lists** have also been implemented where only the top 20 documents with the highest TF-IDF scores are taken into account when performing cosine similarity.\
 Once the document IDs are obtained, using a mapping file, we obtain the titles mapped to each respective ID and display them along with the time taken to process the query. \
-**Note: All index files should be in the index folder.** \
 To run the search engine run the following:
 > python3 search.py
+
+**Note: All index files should be in the index folder.** \
