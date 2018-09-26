@@ -14,7 +14,7 @@ In this part we index the wiki-xml dump and store it in a text file. The index c
 The frequency is modelled in terms of fields (title, body, categories, links, references, etc.). The index is sorted incase of big files (an entire 46GB dump) using the **Single-Pass In-Memory Indexing algorithm**. \
 The index is also broken down into 36 smaller indexes (0.txt for words starting with 0, similarly p.txt and so on). This helps improve the query time.\
 To index an xml dump run the following:
-> python3 index.py <xml-dump-filename> <index-filename>
+> python3 index.py (some-dump).xml index.txt
 
 ## Searching
 This section involves searching through the index to obtain relevant documents and display them along with the time taken to find them. Document ranking is also done to check relevance by using the **TF-IDF scores** for each document.\
