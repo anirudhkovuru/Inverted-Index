@@ -18,6 +18,8 @@ linkPattern = re.compile("l:(.+?)(?=[tclrib][:]|$)", re.M)
 bodyPattern = re.compile("b:(.+?)(?=[tclrib][:]|$)", re.M)
 
 N = 17640866
+tw = 10000
+w = {'t': tw, 'b': 1, 'c': 1, 'i': 1, 'r': 1, 'l': 1}
 
 
 class QueryParser:
@@ -43,6 +45,12 @@ class QueryParser:
             text[k] = m.log10(1 + v)
         return text
 
+    def helper(self, arr, s):
+        for word in arr:
+            if word not in self.q:
+                self.q[word] = {}
+            self.q[word][s] = arr[word]
+
     def process_query(self):
         if ":" in self.q:
             title = self.parse_query(titlePattern)
@@ -52,12 +60,12 @@ class QueryParser:
             link = self.parse_query(linkPattern)
             body = self.parse_query(bodyPattern)
             self.q = dict()
-            self.q["t"] = title
-            self.q["c"] = category
-            self.q["i"] = infobox
-            self.q["r"] = reference
-            self.q["l"] = link
-            self.q["b"] = body
+            self.helper(title, 't')
+            self.helper(category, 'c')
+            self.helper(infobox, 'i')
+            self.helper(reference, 'r')
+            self.helper(link, 'l')
+            self.helper(body, 'b')
             return False
         else:
             self.q = self.linguistic_tech(self.q)
@@ -89,11 +97,12 @@ def cos_rank(q, doc_list, idf):
 
 def search(query):
     terms = QueryParser(query)
-    if terms.process_query():
+    check = terms.process_query()
+    if check:
         doc_list = {}
         idf = {}
         for t in terms.q:
-            with open("./index/" + t[0] + ".txt", "r") as f:
+            with open("./index46/" + t[0] + ".txt", "r") as f:
                 for line in f:
                     temp = line.rstrip().split(":")
                     word = temp[0].split("-")[0]
@@ -111,20 +120,28 @@ def search(query):
 
                         # [[DOC_ID, FIELD_PARTS], ......]
 
-                        for i in range(len(posting_list)):
-                            freq = re.split(r"[a-z]", posting_list[i][1])
-                            freq.remove("")
-                            tf = 0
-                            for j in freq:
-                                tf += int(j)
-                            posting_list[i][1] = m.log10(1 + tf) * idf[t]
-
-                        # [[DOC_ID, FREQ], ....]
-
                         for i in range(1, len(posting_list)):
                             posting_list[i][0] = posting_list[i][0] + posting_list[i-1][0]
 
-                        champions_list = sorted(posting_list, key=lambda x: x[1], reverse=True)[:20]
+                        champions_list = []
+                        for i in range(len(posting_list)):
+                            field_freq = re.split(r"[0-9]", posting_list[i][1])
+                            field_freq.remove("")
+                            freq = re.split(r"[a-z]", posting_list[i][1])
+                            freq.remove("")
+                            tf = 0
+                            for k in range(len(field_freq)):
+                                if field_freq[k] == 't':
+                                    tf += int(freq[k]) * tw
+                                if field_freq[k] == 'b':
+                                    tf += int(freq[k])
+                            if tf != 0:
+                                posting_list[i][1] = m.log10(1 + tf) * idf[t]
+                                champions_list.append(posting_list[i])
+
+                        # [[DOC_ID, SCORE], ....]
+
+                        champions_list = sorted(champions_list, key=lambda x: x[1], reverse=True)
 
                         for i in range(len(champions_list)):
                             if champions_list[i][0] not in doc_list:
@@ -132,7 +149,66 @@ def search(query):
                             doc_list[champions_list[i][0]][t] = champions_list[i][1]
                         break
             f.close()
-
         top_docs = cos_rank(terms.q, doc_list, idf)
+
+    else:
+        doc_list = {}
+        idf = {}
+        q = {}
+        for t in terms.q:
+            with open("./index46/" + t[0] + ".txt", "r") as f:
+                for line in f:
+                    temp = line.rstrip().split(":")
+                    word = temp[0].split("-")[0]
+
+                    if t == word:
+                        doc_freq = int(temp[0].split("-")[1])
+                        idf[t] = m.log10(N / doc_freq)
+                        posting_list = temp[1].split("|")
+                        for i in range(len(posting_list)):
+                            temp = posting_list[i]
+                            if not temp.split("-")[0]:
+                                posting_list[i] = [-int(temp.split("-")[1]), temp.split("-")[2]]
+                            else:
+                                posting_list[i] = [int(temp.split("-")[0]), temp.split("-")[1]]
+
+                        # [[DOC_ID, FIELD_PARTS], ......]
+
+                        for i in range(1, len(posting_list)):
+                            posting_list[i][0] = posting_list[i][0] + posting_list[i - 1][0]
+
+                        champions_list = []
+                        for i in range(len(posting_list)):
+                            field_freq = re.split(r"[0-9]", posting_list[i][1])
+                            freq = re.split(r"[a-z]", posting_list[i][1])
+                            freq.remove("")
+                            field_freq.remove("")
+                            tf = 0
+                            for k in range(len(field_freq)):
+                                for fq in terms.q[t]:
+                                    if field_freq[k] == fq:
+                                        tf += int(freq[k]) * w[fq]
+                            if tf != 0:
+                                posting_list[i][1] = m.log10(1 + tf) * idf[t]
+                                champions_list.append(posting_list[i])
+
+                        # [[DOC_ID, SCORE], ....]
+
+                        champions_list = sorted(champions_list, key=lambda x: x[1], reverse=True)
+
+                        for i in range(len(champions_list)):
+                            if champions_list[i][0] not in doc_list:
+                                doc_list[champions_list[i][0]] = {}
+                            doc_list[champions_list[i][0]][t] = champions_list[i][1]
+
+                        q[t] = 0
+                        for fields, freqs in terms.q[t].items():
+                            q[t] += freqs
+                        q[t] = m.log10(1 + q[t])
+
+                        break
+            f.close()
+
+        top_docs = cos_rank(q, doc_list, idf)
 
     return top_docs

@@ -2,7 +2,7 @@ from query import search
 from time import time as t
 
 title_map = {}
-with open("100mapping.txt", encoding="utf8") as f:
+with open("mapping.txt", encoding="utf8") as f:
     for line in f:
         doc_id = line.split()[0]
         try:
